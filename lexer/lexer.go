@@ -20,6 +20,12 @@ func (l *Lexer) readChar() {
 	l.position = l.readPosition
 	l.readPosition += 1
 }
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	}
+	return l.input[l.readPosition]
+}
 
 func (l *Lexer) readIdentifier() string {
 	pos := l.position
@@ -49,7 +55,13 @@ func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	switch c {
 	case '=':
-		tok = AssignToken(token.ASSIGN, c)
+		if l.peekChar() == '=' {
+			tok.Type = token.EQ
+			tok.Literal = "=="
+			l.readChar()
+		} else {
+			tok = AssignToken(token.ASSIGN, c)
+		}
 	case '+':
 		tok = AssignToken(token.PLUS, c)
 	case '(':
@@ -65,7 +77,13 @@ func (l *Lexer) NextToken() token.Token {
 	case ';':
 		tok = AssignToken(token.SEMICOLON, c)
 	case '!':
-		tok = AssignToken(token.BANG, c)
+		if l.peekChar() == '=' {
+			tok.Type = token.NOT_EQ
+			tok.Literal = "!="
+			l.readChar()
+		} else {
+			tok = AssignToken(token.BANG, c)
+		}
 	case '-':
 		tok = AssignToken(token.MINUS, c)
 	case '/':
