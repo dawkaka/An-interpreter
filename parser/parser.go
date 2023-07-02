@@ -44,6 +44,8 @@ func (p *Parser) ParseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
 		return p.ParseLetStatement()
+	case token.RETURN:
+		return p.ParseReturnStatement()
 	default:
 		return nil
 	}
@@ -58,23 +60,7 @@ func (p *Parser) peekTokenError(t token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) ParseLetStatement() ast.Statement {
-	ltStm := &ast.LetStatement{Token: p.currToken}
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-	id := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
-	ltStm.Name = id
-	if !p.expectPeek(token.ASSIGN) {
-		return nil
-	}
-	for !p.currTokenIs(token.SEMICOLON) {
-		p.NextToken()
-	}
-	return ltStm
-}
-
-func (p *Parser) currTokenIs(t token.TokenType) bool {
+func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.currToken.Type == t
 }
 
@@ -92,4 +78,30 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		return true
 	}
 	return false
+}
+
+func (p *Parser) ParseLetStatement() ast.Statement {
+	ltStm := &ast.LetStatement{Token: p.currToken}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	id := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+	ltStm.Name = id
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.NextToken()
+	}
+	return ltStm
+}
+
+func (p *Parser) ParseReturnStatement() ast.Statement {
+	rs := &ast.ReturnStatement{Token: p.currToken}
+	p.NextToken()
+
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.NextToken()
+	}
+	return rs
 }
