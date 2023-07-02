@@ -8,11 +8,18 @@ import (
 	"github.com/dawkaka/go-interpreter/token"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
+
 type Parser struct {
-	l         *lexer.Lexer
-	currToken token.Token
-	peekToken token.Token
-	errors    []string
+	l              *lexer.Lexer
+	currToken      token.Token
+	peekToken      token.Token
+	errors         []string
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -78,6 +85,14 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		return true
 	}
 	return false
+}
+
+func (p *Parser) registerPrefixFn(t token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[t] = fn
+}
+
+func (p *Parser) registerInfixFn(t token.TokenType, fn infixParseFn) {
+	p.infixParseFns[t] = fn
 }
 
 func (p *Parser) ParseLetStatement() ast.Statement {
