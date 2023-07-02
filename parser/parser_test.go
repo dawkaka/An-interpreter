@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dawkaka/go-interpreter/ast"
@@ -20,6 +21,7 @@ let foobar = 838383;`
 	if program == nil {
 		t.Fatal("Program is nil")
 	}
+	checkParsedErrors(t, p)
 	if len(program.Statements) != 3 {
 		t.Fatalf("Expected length to be 3 but got %d", len(program.Statements))
 	}
@@ -35,6 +37,17 @@ let foobar = 838383;`
 	}
 }
 
+func checkParsedErrors(t *testing.T, p *Parser) {
+	errors := p.errors
+	if len(errors) > 0 {
+		t.Errorf("parser has %d errors", len(errors))
+		for _, err := range errors {
+			fmt.Println(err)
+		}
+		t.FailNow()
+	}
+}
+
 func testLetStatement(t *testing.T, st ast.Statement, name string) bool {
 	if st.TokenLiteral() != "let" {
 		t.Errorf("Expected 'let' but got '%s'", st.TokenLiteral())
@@ -47,7 +60,7 @@ func testLetStatement(t *testing.T, st ast.Statement, name string) bool {
 		return false
 	}
 	if letStatement.Name.TokenLiteral() != name {
-		t.Errorf("letStatement.Name.TokenLiteral(); expected: %s, got: %s", letStatement.TokenLiteral(), name)
+		t.Errorf("letStatement.Name.TokenLiteral(); expected: %s, got: %s", letStatement.Name.TokenLiteral(), name)
 		return false
 	}
 	if letStatement.Name.Value != name {

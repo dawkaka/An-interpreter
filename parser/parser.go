@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/dawkaka/go-interpreter/ast"
 	"github.com/dawkaka/go-interpreter/lexer"
 	"github.com/dawkaka/go-interpreter/token"
@@ -10,6 +12,14 @@ type Parser struct {
 	l         *lexer.Lexer
 	currToken token.Token
 	peekToken token.Token
+	errors    []string
+}
+
+func New(l *lexer.Lexer) *Parser {
+	p := &Parser{l: l}
+	p.NextToken()
+	p.NextToken()
+	return p
 }
 
 func (p *Parser) NextToken() {
@@ -39,6 +49,15 @@ func (p *Parser) ParseStatement() ast.Statement {
 	}
 }
 
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+
+func (p *Parser) peekTokenError(t token.TokenType) {
+	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
 func (p *Parser) ParseLetStatement() ast.Statement {
 	ltStm := &ast.LetStatement{Token: p.currToken}
 	if !p.expectPeek(token.IDENT) {
@@ -60,7 +79,11 @@ func (p *Parser) currTokenIs(t token.TokenType) bool {
 }
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
-	return p.peekToken.Type == t
+	if p.peekToken.Type == t {
+		return true
+	}
+	p.peekTokenError(t)
+	return false
 }
 
 func (p *Parser) expectPeek(t token.TokenType) bool {
@@ -69,11 +92,4 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		return true
 	}
 	return false
-}
-
-func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
-	p.NextToken()
-	p.NextToken()
-	return p
 }
