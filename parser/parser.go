@@ -13,6 +13,17 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
+const (
+	_ int = iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX // -X or !X
+	CALL   // myFunction(X)
+)
+
 type Parser struct {
 	l              *lexer.Lexer
 	currToken      token.Token
@@ -54,7 +65,7 @@ func (p *Parser) ParseStatement() ast.Statement {
 	case token.RETURN:
 		return p.ParseReturnStatement()
 	default:
-		return nil
+		return p.ParseExpressionStatement()
 	}
 }
 
@@ -119,4 +130,14 @@ func (p *Parser) ParseReturnStatement() ast.Statement {
 		p.NextToken()
 	}
 	return rs
+}
+
+func (p *Parser) ParseExpressionStatement() ast.Statement {
+	stm := &ast.ExpressionStatement{Tokken: p.currToken}
+	//stm.Expression = p.parseExpression(LOWEST)
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.NextToken()
+	}
+
+	return stm
 }
