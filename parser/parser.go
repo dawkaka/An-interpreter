@@ -134,10 +134,19 @@ func (p *Parser) ParseReturnStatement() ast.Statement {
 
 func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stm := &ast.ExpressionStatement{Tokken: p.currToken}
-	//stm.Expression = p.parseExpression(LOWEST)
+	stm.Expression = p.parseExpression(LOWEST)
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.NextToken()
 	}
 
 	return stm
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.currToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+	return leftExp
 }
