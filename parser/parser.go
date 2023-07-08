@@ -37,6 +37,8 @@ func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l}
 	p.NextToken()
 	p.NextToken()
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	return p
 }
 
@@ -96,6 +98,10 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		return true
 	}
 	return false
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 func (p *Parser) registerPrefixFn(t token.TokenType, fn prefixParseFn) {
