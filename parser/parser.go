@@ -21,8 +21,8 @@ const (
 	LESSGREATER
 	SUM
 	PRODUCT
-	PREFIX // -X or !X
-	CALL   // myFunction(X)
+	PREFIX
+	CALL
 )
 
 var precedence = map[token.TokenType]int{
