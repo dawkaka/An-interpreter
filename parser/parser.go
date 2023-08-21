@@ -52,8 +52,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefixFn(token.IDENT, p.parseIdentifier)
 	p.registerPrefixFn(token.INT, p.parseIntegerLiteral)
-	p.registerPrefixFn(token.MINUS, p.parsePrefixEpression)
-	p.registerPrefixFn(token.BANG, p.parsePrefixEpression)
+	p.registerPrefixFn(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefixFn(token.BANG, p.parsePrefixExpression)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfixFn(token.PLUS, p.parseInfixExpression)
 	p.registerInfixFn(token.MINUS, p.parseInfixExpression)
@@ -150,7 +151,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return &ast.IntegerLiteral{Token: p.currToken, Value: v}
 }
 
-func (p *Parser) parsePrefixEpression() ast.Expression {
+func (p *Parser) parsePrefixExpression() ast.Expression {
 	expression := &ast.PrefixExpression{Token: p.currToken, Operator: p.currToken.Literal}
 	p.NextToken()
 	expression.Right = p.parseExpression(PREFIX)
@@ -221,9 +222,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currToken.Type]
 	if prefix == nil {
 		fmt.Println(p.currToken.Literal, p.peekToken.Literal)
-		p.noPrefixParseFnError(p.currToken.Type)
+		// p.noPrefixParseFnError(p.currToken.Type)
 		return nil
 	}
+
 	leftExp := prefix()
 	if !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekTokenPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
