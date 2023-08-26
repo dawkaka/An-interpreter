@@ -221,13 +221,12 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currToken.Type]
 	if prefix == nil {
-		fmt.Println(p.currToken.Literal, p.peekToken.Literal)
-		// p.noPrefixParseFnError(p.currToken.Type)
+		p.noPrefixParseFnError(p.currToken.Type)
 		return nil
 	}
 
 	leftExp := prefix()
-	if !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekTokenPrecedence() {
+	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekTokenPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
 			return leftExp
