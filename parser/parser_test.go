@@ -317,7 +317,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
 		{
-			"1 + (2 + 3) 4",
+			"1 + (2 + 3) + 4",
 			"((1 + (2 + 3)) + 4)",
 		},
 		{
@@ -330,7 +330,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		},
 		{
 			"-(5 + 5)",
-			"(-(5 +5))",
+			"(-(5 + 5))",
 		},
 		{
 			"!(true == true)",
